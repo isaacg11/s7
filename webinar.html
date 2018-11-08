@@ -1,0 +1,90 @@
+
+    <!DOCTYPE html>
+        <html>
+          <head>
+            <script
+              src="https://code.jquery.com/jquery-3.2.1.min.js"
+              integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+              crossorigin="anonymous">
+            </script>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+            <meta charset="utf-8">
+            <style media="screen">
+              body, html
+              {
+                margin: 0; padding: 0; height: 100%; overflow: hidden;
+              }
+              #content {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                top: 0;
+              }
+              #iframe {
+                width: 1px;
+                min-width: 100%;
+                *width: 100%;
+                height: 100%;
+                border: ;
+              }
+            </style>
+            <title></title>
+          </head>
+          <body>
+            <div id="content">
+              <iframe id='iframe' src=""></iframe>
+            </div>
+            <script type="text/javascript">
+              $(document).ready(function(){
+
+                var iframe = document.getElementsByTagName("iframe")[0];
+                let url = "https://api.clicktool.com/rotator";
+                let queryString = window.location.search;
+                var currentTime = Math.round(new Date().getTime() / 1000);
+                var timeLapse = (window.localStorage.clicktool_prev_visit) ? (currentTime - window.localStorage.clicktool_prev_visit) : false;
+                queryString = queryString.substring(1);
+
+
+                let data = JSON.stringify(Object.assign({
+                  campaignId : "a4f7c3d9-d282-4bd4-a3cf-ace0eeda828d",
+                  cookies: (document.cookie) ? document.cookie : false,
+                  timeSincePreviousVisit: timeLapse,
+                  url: window.location.href.split("?")[0]
+                },{customVars : parseQueryString(queryString)}))
+
+                $.ajax({
+                    type:'POST',
+                    url: url,
+                    data:data,
+                    crossDomain:true,
+                    xhrFields: { withCredentials: true },
+                    dataType:'json',
+                    success:function(data) {
+                      if(data.directLinking) {
+                        window.location.replace(data.url)
+                      } else {
+                        iframe.src = data.url + '?cid=' + data.cid;
+                        document.title = data.url;
+                        document.cookie = 'cid=' + data.cid;
+                        window.localStorage.setItem("clicktool_prev_visit", currentTime);
+                      }
+                    },
+                });
+              })
+
+              var parseQueryString = function( queryString ) {
+                  var params = {}, queries, temp, i, l;
+                  queries = queryString.split("&");
+                  for ( i = 0, l = queries.length; i < l; i++ ) {
+                      temp = queries[i].split('=');
+                      params[temp[0]] = temp[1];
+                  }
+                  return params;
+              };
+
+            </script>
+          </body>
+        </html>
+    
